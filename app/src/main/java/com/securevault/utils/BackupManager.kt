@@ -217,10 +217,8 @@ class BackupManager(
 
             Log.d(TAG, "Parsed backup data - Version: ${backupData.version}, Count: ${backupData.passwordCount}")
 
-            // Validate backup format
-            if (!backupData.encrypted) {
-                return RestoreResult.InvalidFile("Backup file is not encrypted")
-            }
+            // Note: We don't check the 'encrypted' field for backward compatibility
+            // If data is not encrypted, decryption will fail with InvalidPassword
 
             // Decrypt the password data
             val decryptedJson = try {
