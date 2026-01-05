@@ -143,15 +143,15 @@ dependencies {
 
 // Task to preserve ProGuard mappings for crash analysis
 tasks.register("saveProguardMapping", Copy::class) {
-    from("$buildDir/outputs/mapping/release")
-    into("$rootDir/proguard-mappings/v${android.defaultConfig.versionName}")
+    from(layout.buildDirectory.dir("outputs/mapping/release"))
+    into(rootProject.layout.projectDirectory.dir("proguard-mappings/v${android.defaultConfig.versionName}"))
     include("mapping.txt")
     doFirst {
         println("Saving ProGuard mapping for version ${android.defaultConfig.versionName}")
     }
 }
 
-// Automatically save mapping after release build
-tasks.named("assembleRelease") {
-    finalizedBy("saveProguardMapping")
+// Automatically save mapping after release build (using afterEvaluate to ensure task exists)
+afterEvaluate {
+    tasks.findByName("assembleRelease")?.finalizedBy("saveProguardMapping")
 }
