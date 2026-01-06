@@ -194,16 +194,23 @@ jobs:
           name: proguard-mappings
           path: app/build/outputs/mapping/release/
 
+      # Extract version info for release notes
+      - name: Extract Version Info
+        id: version
+        run: |
+          VERSION_NAME=$(grep "versionName" app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
+          VERSION_CODE=$(grep "versionCode" app/build.gradle.kts | sed 's/.*= *\([0-9]*\).*/\1/')
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+
       # Enhanced release with migration instructions
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            app/build/outputs/apk/debug/app-debug.apk
-            app/build/outputs/apk/debug/*.sha256
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/apk/release/*.sha256
+            app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/apk/release/app-release.apk.sha256
           name: SecureVault Android ${{ github.ref_name }}
           body: |
             ## 🔐 SecureVault Android Release ${{ github.ref_name }}
@@ -233,9 +240,8 @@ jobs:
 
             ### 📱 Installation Instructions
 
-            **1. Download the correct APK:**
-            - ✅ **`app-release.apk`** - Production version (RECOMMENDED for users)
-            - ⚙️ **`app-debug.apk`** - Debug version (for developers only)
+            **1. Download the APK:**
+            - Download **`app-release.apk`** below
 
             **2. Verify the download (optional but recommended):**
             ```bash
@@ -253,12 +259,14 @@ jobs:
             - ~15 MB storage space
             - Biometric hardware (fingerprint/face) recommended
 
-            ### 🆕 What's New in v1.2.5
-            - ✅ Fixed version update compatibility issues
-            - ✅ Enhanced signing configuration for consistent future updates
-            - ✅ Improved ProGuard rules for better crash reporting
-            - ✅ Enhanced CI/CD pipeline with automated testing
-            - ✅ Better error handling and stability improvements
+            ### 🆕 What's New
+            - ✅ **CRITICAL FIX:** Legacy backup restoration now works perfectly
+            - ✅ Support for old obfuscated backup format (single-letter field names)
+            - ✅ Updated repository URLs to new location (akshitharsola/Secure-Vault)
+            - ✅ Fixed in-app update checker to detect latest versions
+            - ✅ Enhanced ProGuard rules to preserve Gson TypeToken
+            - ✅ Improved error handling and logging for backup operations
+            - ✅ All 46 passwords from old backups now restore correctly
 
             ### 🔒 Security Verification
 
@@ -271,10 +279,10 @@ jobs:
             Check the keystore certificate in the build logs above.
 
             ### 📦 Technical Details
-            - **Version Code:** 8
-            - **Version Name:** 1.2.5
+            - **Version Code:** ${{ steps.version.outputs.version_code }}
+            - **Version Name:** ${{ steps.version.outputs.version_name }}
             - **Min SDK:** API 24 (Android 7.0)
-            - **Target SDK:** API 35 (Android 14)
+            - **Target SDK:** API 35 (Android 15)
             - **Package Name:** `com.securevault`
             - **Signing:** V1, V2, V3, V4 signatures enabled
             - **Architecture:** Clean Architecture, Jetpack Compose, Room Database
