@@ -31,7 +31,7 @@ data class PasswordEntity(
     companion object {
         fun fromPassword(password: Password): PasswordEntity {
             return PasswordEntity(
-                id = password.id,
+                id = password.id ?: java.util.UUID.randomUUID().toString(), // Generate ID if null
                 title = password.title,
                 username = password.username,
                 password = password.password,

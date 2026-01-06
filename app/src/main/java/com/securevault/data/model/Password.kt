@@ -4,7 +4,7 @@ package com.securevault.data.model
 import java.util.UUID
 
 data class Password(
-    val id: String = UUID.randomUUID().toString(),
+    val id: String? = null, // Nullable to handle old backups, will be generated if null
     val title: String,
     val username: String,
     val password: String,
