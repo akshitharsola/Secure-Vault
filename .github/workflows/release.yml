@@ -133,11 +133,8 @@ jobs:
           echo "SIGNING_KEY_PASSWORD is set: $([ -n "$SIGNING_KEY_PASSWORD" ] && echo 'YES' || echo 'NO')"
           echo "SIGNING_STORE_PASSWORD is set: $([ -n "$SIGNING_STORE_PASSWORD" ] && echo 'YES' || echo 'NO')"
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon
-
       - name: Build Release APK
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
 
       # Verify APK signatures
       - name: Verify Release APK Signature
@@ -158,17 +155,11 @@ jobs:
           echo "Release APK SHA256:"
           cat app-release.apk.sha256
 
-          cd ../debug
-          sha256sum app-debug.apk > app-debug.apk.sha256
-          echo "Debug APK SHA256:"
-          cat app-debug.apk.sha256
-
-      # Show APK sizes
-      - name: Show APK Sizes
+      # Show APK size
+      - name: Show APK Size
         run: |
           echo "📦 APK Size Information:"
           ls -lh app/build/outputs/apk/release/app-release.apk
-          ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
@@ -177,14 +168,6 @@ jobs:
           path: |
             app/build/outputs/apk/release/*.apk
             app/build/outputs/apk/release/*.sha256
-
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-apk
-          path: |
-            app/build/outputs/apk/debug/app-debug.apk
-            app/build/outputs/apk/debug/*.sha256
 
       # Upload ProGuard mappings
       - name: Upload ProGuard Mappings
@@ -314,7 +297,6 @@ jobs:
           echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Generated Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "- Release APK" >> $GITHUB_STEP_SUMMARY
-          echo "- Debug APK" >> $GITHUB_STEP_SUMMARY
-          echo "- SHA256 Checksums" >> $GITHUB_STEP_SUMMARY
-          echo "- ProGuard Mappings" >> $GITHUB_STEP_SUMMARY
+          echo "- Release APK (signed, optimized with ProGuard)" >> $GITHUB_STEP_SUMMARY
+          echo "- SHA256 Checksum" >> $GITHUB_STEP_SUMMARY
+          echo "- ProGuard Mappings (for crash analysis)" >> $GITHUB_STEP_SUMMARY
