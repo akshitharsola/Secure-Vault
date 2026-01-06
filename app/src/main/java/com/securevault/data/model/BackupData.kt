@@ -31,6 +31,30 @@ data class BackupData(
 )
 
 /**
+ * Legacy backup format with obfuscated keys (pre-v1.2.6)
+ * Kept for backward compatibility with old backups
+ */
+data class LegacyBackupData(
+    @SerializedName("a")
+    val version: String = "1.0",
+
+    @SerializedName("b")
+    val timestamp: String,
+
+    @SerializedName("c")
+    val passwordCount: Int,
+
+    @SerializedName("d")
+    val appName: String = "SecureVault",
+
+    @SerializedName("e")
+    val platform: String = "Android",
+
+    @SerializedName("f")
+    val data: String // Base64 encoded encrypted JSON string of passwords
+)
+
+/**
  * Represents the result of backup operations
  */
 sealed class BackupResult {

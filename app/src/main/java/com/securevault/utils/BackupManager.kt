@@ -218,16 +218,28 @@ class BackupManager(
                 null
             }
 
-            // Determine if this is old format (pre-v1.2.6) or new format
+            // Try to parse as legacy obfuscated format
+            val legacyBackupData = try {
+                gson.fromJson(backupJson, com.securevault.data.model.LegacyBackupData::class.java)
+            } catch (e: Exception) {
+                null
+            }
+
+            // Determine which format and extract encrypted data
             val encryptedData = when {
                 // New format: has BackupData wrapper with data field
                 backupData != null && !backupData.data.isNullOrBlank() -> {
                     Log.d(TAG, "Detected new backup format - Version: ${backupData.version}, Count: ${backupData.passwordCount}")
                     backupData.data
                 }
-                // Old format: entire file is encrypted data (no JSON wrapper)
+                // Legacy format: obfuscated keys (a, b, c, d, e, f)
+                legacyBackupData != null && !legacyBackupData.data.isNullOrBlank() -> {
+                    Log.d(TAG, "Detected legacy obfuscated backup format - Count: ${legacyBackupData.passwordCount}")
+                    legacyBackupData.data
+                }
+                // Very old format: entire file is encrypted data (no JSON wrapper)
                 else -> {
-                    Log.d(TAG, "Detected old backup format (pre-v1.2.6)")
+                    Log.d(TAG, "Detected very old backup format (raw encrypted data)")
                     backupJson.trim()
                 }
             }

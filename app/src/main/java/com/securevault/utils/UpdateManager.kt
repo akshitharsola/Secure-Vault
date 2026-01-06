@@ -25,7 +25,7 @@ data class UpdateInfo(
 
 class UpdateManager(private val context: Context) {
     companion object {
-        private const val GITHUB_API_URL = "https://api.github.com/repos/akshitharsola/SecureVault-Android/releases/latest"
+        private const val GITHUB_API_URL = "https://api.github.com/repos/akshitharsola/Secure-Vault/releases/latest"
         private const val UPDATE_CHECK_TIMEOUT = 10000 // 10 seconds
     }
 
