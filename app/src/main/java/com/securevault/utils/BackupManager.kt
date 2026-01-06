@@ -255,29 +255,56 @@ class BackupManager(
                 return RestoreResult.Error("Failed to decrypt backup: ${e.message}")
             }
 
-            // Parse passwords from decrypted JSON using PasswordDto to handle null fields
-            val passwordDtoType = object : com.google.gson.reflect.TypeToken<List<com.securevault.data.model.PasswordDto>>() {}.type
-            val passwordDtos: List<com.securevault.data.model.PasswordDto>? = gson.fromJson(decryptedJson, passwordDtoType)
+            // Parse passwords from decrypted JSON - try multiple formats
+            var passwords: List<Password> = emptyList()
+            var formatUsed = "unknown"
 
-            if (passwordDtos == null) {
-                return RestoreResult.InvalidFile("Invalid password data in backup")
+            // Try new format first (standard field names: id, title, username, password, notes, createdAt, updatedAt)
+            try {
+                val passwordDtoType = object : com.google.gson.reflect.TypeToken<List<com.securevault.data.model.PasswordDto>>() {}.type
+                val passwordDtos: List<com.securevault.data.model.PasswordDto>? = gson.fromJson(decryptedJson, passwordDtoType)
+
+                if (passwordDtos != null) {
+                    passwords = passwordDtos.mapNotNull { it.toPassword() }
+                    if (passwords.isNotEmpty()) {
+                        formatUsed = "new format"
+                        Log.d(TAG, "Successfully parsed using new format - ${passwords.size} passwords")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "Failed to parse as new format: ${e.message}")
             }
 
-            // Convert DTOs to Passwords, filtering out invalid entries
-            val passwords = passwordDtos.mapNotNull { dto ->
-                val password = dto.toPassword()
-                if (password == null) {
-                    Log.w(TAG, "Skipping invalid password entry - missing required fields (title/username/password)")
-                    Log.d(TAG, "  DTO: id=${dto.id}, title=${dto.title}, username=${dto.username}")
+            // If new format failed or got no valid passwords, try legacy obfuscated format (a, b, c, d, e, f, g)
+            if (passwords.isEmpty()) {
+                try {
+                    val legacyPasswordDtoType = object : com.google.gson.reflect.TypeToken<List<com.securevault.data.model.LegacyPasswordDto>>() {}.type
+                    val legacyPasswordDtos: List<com.securevault.data.model.LegacyPasswordDto>? = gson.fromJson(decryptedJson, legacyPasswordDtoType)
+
+                    if (legacyPasswordDtos != null) {
+                        passwords = legacyPasswordDtos.mapNotNull { dto ->
+                            val password = dto.toPassword()
+                            if (password == null) {
+                                Log.w(TAG, "Skipping invalid legacy password entry - missing required fields")
+                                Log.d(TAG, "  Legacy DTO: id=${dto.id}, title=${dto.title}, username=${dto.username}")
+                            }
+                            password
+                        }
+                        if (passwords.isNotEmpty()) {
+                            formatUsed = "legacy obfuscated format"
+                            Log.d(TAG, "Successfully parsed using legacy obfuscated format - ${passwords.size} passwords")
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.d(TAG, "Failed to parse as legacy format: ${e.message}")
                 }
-                password
             }
 
             if (passwords.isEmpty()) {
-                return RestoreResult.Error("No valid passwords found in backup")
+                return RestoreResult.Error("No valid passwords found in backup (tried multiple formats)")
             }
 
-            Log.d(TAG, "Successfully decrypted and validated ${passwords.size} passwords (${passwordDtos.size - passwords.size} skipped)")
+            Log.d(TAG, "Successfully decrypted and validated ${passwords.size} passwords using $formatUsed")
 
             // Use repository method for replacing all passwords
             val success = if (replaceAll) {

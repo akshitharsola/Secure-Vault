@@ -47,3 +47,38 @@ data class PasswordDto(
         )
     }
 }
+
+/**
+ * Legacy DTO for deserializing old obfuscated backup format
+ * Old backups used single-letter field names for obfuscation
+ */
+data class LegacyPasswordDto(
+    @com.google.gson.annotations.SerializedName("a") val id: String? = null,
+    @com.google.gson.annotations.SerializedName("b") val title: String? = null,
+    @com.google.gson.annotations.SerializedName("c") val username: String? = null,
+    @com.google.gson.annotations.SerializedName("d") val password: String? = null,
+    @com.google.gson.annotations.SerializedName("e") val notes: String? = null,
+    @com.google.gson.annotations.SerializedName("f") val createdAt: Long? = null,
+    @com.google.gson.annotations.SerializedName("g") val updatedAt: Long? = null
+) {
+    /**
+     * Converts legacy DTO to Password
+     * Returns null if required fields (title, username, password) are missing
+     */
+    fun toPassword(): Password? {
+        // Required fields must not be null/blank
+        if (title.isNullOrBlank() || username.isNullOrBlank() || password.isNullOrBlank()) {
+            return null
+        }
+
+        return Password(
+            id = id?.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString(),
+            title = title,
+            username = username,
+            password = password,
+            notes = notes ?: "",
+            createdAt = createdAt ?: System.currentTimeMillis(),
+            updatedAt = updatedAt ?: System.currentTimeMillis()
+        )
+    }
+}
