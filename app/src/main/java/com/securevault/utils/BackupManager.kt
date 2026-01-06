@@ -255,26 +255,29 @@ class BackupManager(
                 return RestoreResult.Error("Failed to decrypt backup: ${e.message}")
             }
 
-            // Parse passwords from decrypted JSON
-            val passwordType = object : com.google.gson.reflect.TypeToken<List<Password>>() {}.type
-            val rawPasswords: List<Password>? = gson.fromJson(decryptedJson, passwordType)
+            // Parse passwords from decrypted JSON using PasswordDto to handle null fields
+            val passwordDtoType = object : com.google.gson.reflect.TypeToken<List<com.securevault.data.model.PasswordDto>>() {}.type
+            val passwordDtos: List<com.securevault.data.model.PasswordDto>? = gson.fromJson(decryptedJson, passwordDtoType)
 
-            if (rawPasswords == null) {
+            if (passwordDtos == null) {
                 return RestoreResult.InvalidFile("Invalid password data in backup")
             }
 
-            // CRITICAL: Fix null IDs from old backups
-            // Gson doesn't call default value initializers, so we need to generate IDs for null ones
-            val passwords = rawPasswords.map { password ->
-                if (password.id.isNullOrBlank()) {
-                    Log.w(TAG, "Found password with null/blank ID, generating new UUID for: ${password.title}")
-                    password.copy(id = java.util.UUID.randomUUID().toString())
-                } else {
-                    password
+            // Convert DTOs to Passwords, filtering out invalid entries
+            val passwords = passwordDtos.mapNotNull { dto ->
+                val password = dto.toPassword()
+                if (password == null) {
+                    Log.w(TAG, "Skipping invalid password entry - missing required fields (title/username/password)")
+                    Log.d(TAG, "  DTO: id=${dto.id}, title=${dto.title}, username=${dto.username}")
                 }
+                password
             }
 
-            Log.d(TAG, "Successfully decrypted ${passwords.size} passwords")
+            if (passwords.isEmpty()) {
+                return RestoreResult.Error("No valid passwords found in backup")
+            }
+
+            Log.d(TAG, "Successfully decrypted and validated ${passwords.size} passwords (${passwordDtos.size - passwords.size} skipped)")
 
             // Use repository method for replacing all passwords
             val success = if (replaceAll) {

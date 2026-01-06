@@ -283,8 +283,7 @@ fun MainScreen(navController: NavController) {
                     PasswordList(
                         passwords = filteredPasswords,
                         onPasswordClick = { password ->
-                            // ID should never be null here (generated during save/restore if missing)
-                            navController.navigate(Screen.Detail.createRoute(password.id ?: ""))
+                            navController.navigate(Screen.Detail.createRoute(password.id))
                         }
                     )
                 }
