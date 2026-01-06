@@ -198,10 +198,10 @@ jobs:
       - name: Extract Version Info
         id: version
         run: |
-          VERSION_NAME=$(grep "versionName" app/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
+          VERSION_NAME=$(grep "versionName" app/build.gradle.kts | grep -v "versionNameSuffix" | sed 's/.*"\(.*\)".*/\1/')
           VERSION_CODE=$(grep "versionCode" app/build.gradle.kts | sed 's/.*= *\([0-9]*\).*/\1/')
-          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
-          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
 
       # Enhanced release with migration instructions
       - name: Create Release
