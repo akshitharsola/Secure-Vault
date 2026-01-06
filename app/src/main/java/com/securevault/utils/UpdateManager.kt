@@ -186,11 +186,23 @@ class UpdateManager(private val context: Context) {
 
     fun downloadUpdate(downloadUrl: String) {
         try {
+            android.util.Log.d("UpdateManager", "Opening download URL: $downloadUrl")
+
+            if (downloadUrl.isBlank()) {
+                android.util.Log.e("UpdateManager", "Download URL is blank")
+                android.widget.Toast.makeText(context, "Download URL not available", android.widget.Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            // Open the download URL in browser (GitHub will redirect to download)
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
+
+            android.util.Log.d("UpdateManager", "Download intent started successfully")
         } catch (e: Exception) {
-            // Handle error - could show a toast or callback
+            android.util.Log.e("UpdateManager", "Error opening download URL", e)
+            android.widget.Toast.makeText(context, "Failed to open download: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
         }
     }
 

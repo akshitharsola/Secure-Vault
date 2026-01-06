@@ -257,8 +257,22 @@ class BackupManager(
 
             // Parse passwords from decrypted JSON
             val passwordType = object : com.google.gson.reflect.TypeToken<List<Password>>() {}.type
-            val passwords: List<Password> = gson.fromJson(decryptedJson, passwordType)
-                ?: return RestoreResult.InvalidFile("Invalid password data in backup")
+            val rawPasswords: List<Password>? = gson.fromJson(decryptedJson, passwordType)
+
+            if (rawPasswords == null) {
+                return RestoreResult.InvalidFile("Invalid password data in backup")
+            }
+
+            // CRITICAL: Fix null IDs from old backups
+            // Gson doesn't call default value initializers, so we need to generate IDs for null ones
+            val passwords = rawPasswords.map { password ->
+                if (password.id.isNullOrBlank()) {
+                    Log.w(TAG, "Found password with null/blank ID, generating new UUID for: ${password.title}")
+                    password.copy(id = java.util.UUID.randomUUID().toString())
+                } else {
+                    password
+                }
+            }
 
             Log.d(TAG, "Successfully decrypted ${passwords.size} passwords")
 
