@@ -102,7 +102,10 @@ secrets/
 
 # Test results
 test-results/
-screenshots/
+# Note: Screenshots/ (capital S) contains README images and should be committed
+# Only ignore lowercase screenshots/ for test output
+fastlane/screenshots/
+test-screenshots/
 
 # Temporary files
 *.tmp
