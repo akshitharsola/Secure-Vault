@@ -506,7 +506,7 @@ fun SettingsScreen(navController: NavController) {
                         Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open README")
                     },
                     modifier = Modifier.clickable {
-                        openUrl("https://github.com/akshitharsola/SecureVault-Android/blob/master/README.md")
+                        openUrl("https://github.com/akshitharsola/Secure-Vault/blob/main/README.md")
                     }
                 )
 
@@ -525,7 +525,7 @@ fun SettingsScreen(navController: NavController) {
                         Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open Features")
                     },
                     modifier = Modifier.clickable {
-                        openUrl("https://github.com/akshitharsola/SecureVault-Android#features")
+                        openUrl("https://github.com/akshitharsola/Secure-Vault#features")
                     }
                 )
 
@@ -570,7 +570,7 @@ fun SettingsScreen(navController: NavController) {
                         Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open License")
                     },
                     modifier = Modifier.clickable {
-                        openUrl("https://github.com/akshitharsola/SecureVault-Android/blob/master/LICENSE")
+                        openUrl("https://github.com/akshitharsola/Secure-Vault/blob/main/LICENSE")
                     }
                 )
 
@@ -589,7 +589,7 @@ fun SettingsScreen(navController: NavController) {
                         Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open Project")
                     },
                     modifier = Modifier.clickable {
-                        openUrl("https://github.com/akshitharsola/SecureVault-Android#technologies-used")
+                        openUrl("https://github.com/akshitharsola/Secure-Vault#technologies-used")
                     }
                 )
 
