@@ -63,10 +63,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew test --no-daemon
+        run: ./gradlew test --no-daemon --stacktrace
+        continue-on-error: false
 
       - name: Run lint checks
-        run: ./gradlew lint --no-daemon
+        run: ./gradlew lint --no-daemon --stacktrace
+        continue-on-error: false
 
       - name: Upload test results
         if: always()
