@@ -41,15 +41,33 @@
 -keepattributes Signature
 -keepattributes *Annotation*
 
-# Gson specific rules
+# Gson specific rules - CRITICAL for backup/restore
 -keepattributes Signature
 -keepattributes *Annotation*
+-keepattributes EnclosingMethod
 -dontwarn sun.misc.**
 -keep class com.google.gson.** { *; }
 -keep class * implements com.google.gson.TypeAdapter
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
+
+# CRITICAL: Keep TypeToken and generic signatures for backup restore
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+-keepclassmembers class * extends com.google.gson.reflect.TypeToken {
+   *;
+}
+
+# CRITICAL: Preserve all fields and generic signatures in data models
+-keepclassmembers class com.securevault.data.model.** {
+    <fields>;
+    <init>(...);
+}
+
+# Keep generic signature of Password List for TypeToken
+-keep,allowobfuscation,allowshrinking class com.securevault.data.model.Password
+-keep,allowobfuscation,allowshrinking class * implements java.util.List
 
 # Keep UpdateManager for version checking
 -keep class com.securevault.utils.UpdateManager { *; }
