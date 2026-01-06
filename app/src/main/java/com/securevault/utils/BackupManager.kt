@@ -211,21 +211,36 @@ class BackupManager(
         replaceAll: Boolean
     ): RestoreResult {
         try {
-            // Parse backup data
-            val backupData = gson.fromJson(backupJson, BackupData::class.java)
-                ?: return RestoreResult.InvalidFile("Invalid backup file format")
+            // Try to parse as new format first
+            val backupData = try {
+                gson.fromJson(backupJson, BackupData::class.java)
+            } catch (e: Exception) {
+                null
+            }
 
-            Log.d(TAG, "Parsed backup data - Version: ${backupData.version}, Count: ${backupData.passwordCount}")
-
-            // Note: We don't check the 'encrypted' field for backward compatibility
-            // If data is not encrypted, decryption will fail with InvalidPassword
+            // Determine if this is old format (pre-v1.2.6) or new format
+            val encryptedData = when {
+                // New format: has BackupData wrapper with data field
+                backupData != null && !backupData.data.isNullOrBlank() -> {
+                    Log.d(TAG, "Detected new backup format - Version: ${backupData.version}, Count: ${backupData.passwordCount}")
+                    backupData.data
+                }
+                // Old format: entire file is encrypted data (no JSON wrapper)
+                else -> {
+                    Log.d(TAG, "Detected old backup format (pre-v1.2.6)")
+                    backupJson.trim()
+                }
+            }
 
             // Decrypt the password data
             val decryptedJson = try {
-                backupEncryption.decrypt(backupData.data, password)
+                backupEncryption.decrypt(encryptedData, password)
             } catch (e: DecryptionException) {
                 Log.w(TAG, "Failed to decrypt backup - invalid password")
                 return RestoreResult.InvalidPassword()
+            } catch (e: Exception) {
+                Log.e(TAG, "Decryption error", e)
+                return RestoreResult.Error("Failed to decrypt backup: ${e.message}")
             }
 
             // Parse passwords from decrypted JSON
