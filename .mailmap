@@ -1,0 +1,9 @@
+# Git mailmap for proper contributor attribution
+# Format: Proper Name <proper@email> <commit@email>
+
+# Map all Akshit's emails to canonical identity
+Akshit Harsola <akshitharsola@example.com>
+
+# Map Claude AI assistant contributions
+Claude (Anthropic) <noreply@anthropic.com> <noreply@anthropic.com>
+Claude (Anthropic) <noreply@anthropic.com> Claude Sonnet 4.5 <noreply@anthropic.com>
