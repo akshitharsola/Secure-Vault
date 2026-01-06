@@ -283,7 +283,8 @@ fun MainScreen(navController: NavController) {
                     PasswordList(
                         passwords = filteredPasswords,
                         onPasswordClick = { password ->
-                            navController.navigate(Screen.Detail.createRoute(password.id))
+                            // ID should never be null here (generated during save/restore if missing)
+                            navController.navigate(Screen.Detail.createRoute(password.id ?: ""))
                         }
                     )
                 }
@@ -452,7 +453,7 @@ fun PasswordList(
     ) {
         items(
             items = passwords,
-            key = { it.id }
+            key = { it.id ?: "" } // ID should never be null (generated if missing)
         ) { password ->
             PasswordItem(
                 password = password,
