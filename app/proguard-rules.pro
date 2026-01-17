@@ -88,3 +88,22 @@
 -keepclassmembers,allowobfuscation class * {
   @com.google.gson.annotations.SerializedName <fields>;
 }
+
+# ============================================================================
+# Bouncy Castle Post-Quantum Cryptography (PQC) Rules
+# ============================================================================
+
+# Keep all Bouncy Castle PQC classes - needed for quantum-resistant encryption
+-keep class org.bouncycastle.pqc.** { *; }
+-keep class org.bouncycastle.crypto.** { *; }
+-keep class org.bouncycastle.asn1.** { *; }
+-keep class org.bouncycastle.jcajce.** { *; }
+
+# Keep Bouncy Castle providers
+-keep class org.bouncycastle.jce.provider.** { *; }
+
+# Don't warn about Bouncy Castle optional dependencies
+-dontwarn org.bouncycastle.**
+
+# Keep quantum backup encryption class
+-keep class com.securevault.utils.QuantumBackupEncryption { *; }
