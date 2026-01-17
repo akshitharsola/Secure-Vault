@@ -5,11 +5,19 @@ import com.google.gson.annotations.SerializedName
 
 /**
  * Data class representing the structure of backup files
- * Compatible with iOS implementation for cross-platform backup/restore
+ *
+ * Version History:
+ * - v1.0: PBKDF2-HMAC-SHA256 + AES-256-CBC encryption
+ * - v2.0: PBKDF2-HMAC-SHA512 + AES-256-GCM (quantum-resistant, authenticated)
+ *
+ * Backward Compatibility:
+ * - v2.0 backups include optional encryptionType field
+ * - v1.0 backups can be read by v2.0+ apps
+ * - v2.0 backups cannot be read by v1.0 apps (expected behavior)
  */
 data class BackupData(
     @SerializedName("version")
-    val version: String = "1.0",
+    val version: String = "2.0",  // Updated to v2.0 for new backups
 
     @SerializedName("timestamp")
     val timestamp: String,
@@ -27,7 +35,20 @@ data class BackupData(
     val platform: String = "Android",
 
     @SerializedName("data")
-    val data: String // Base64 encoded encrypted JSON string of passwords
+    val data: String, // Base64 encoded encrypted JSON string of passwords
+
+    // v2.0 fields (optional for backward compatibility)
+    @SerializedName("encryptionType")
+    val encryptionType: String? = null,  // e.g., "password-aes256gcm-pqc-ready"
+
+    @SerializedName("kdf")
+    val kdf: String? = null,  // e.g., "PBKDF2-HMAC-SHA512"
+
+    @SerializedName("iterations")
+    val iterations: Int? = null,  // e.g., 100000
+
+    @SerializedName("quantumResistant")
+    val quantumResistant: Boolean? = null  // true for v2.0 backups
 )
 
 /**

@@ -26,7 +26,8 @@ class BackupManager(
     private val passwordRepository: PasswordRepository
 ) {
 
-    private val backupEncryption = BackupEncryption()
+    private val backupEncryption = BackupEncryption()  // v1.0 encryption (backward compatibility)
+    private val quantumBackupEncryption = QuantumBackupEncryption(context)  // v2.0 quantum encryption
     private val fileManager = FileManager(context)
     private val gson: Gson = GsonBuilder()
         .setPrettyPrinting()
@@ -58,15 +59,23 @@ class BackupManager(
             val passwordsJson = gson.toJson(passwords)
             Log.d(TAG, "Serialized ${passwords.size} passwords to JSON")
 
-            // Encrypt the JSON data
-            val encryptedData = backupEncryption.encrypt(passwordsJson, password)
-            Log.d(TAG, "Password data encrypted successfully")
+            // Encrypt the JSON data with v2.0 quantum-resistant encryption
+            val encryptedData = quantumBackupEncryption.encrypt(passwordsJson, password)
+            Log.d(TAG, "Password data encrypted with quantum-resistant encryption (v2.0)")
 
-            // Create backup data structure
+            // Get encryption metadata
+            val metadata = quantumBackupEncryption.getEncryptionMetadata()
+
+            // Create backup data structure with v2.0 metadata
             val backupData = BackupData(
+                version = "2.0",  // Explicitly set v2.0
                 timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(Date()),
                 passwordCount = passwords.size,
-                data = encryptedData
+                data = encryptedData,
+                encryptionType = metadata["encryptionType"],
+                kdf = metadata["kdf"],
+                iterations = metadata["iterations"]?.toIntOrNull(),
+                quantumResistant = metadata["quantumResistant"]?.toBoolean()
             )
 
             // Convert backup data to JSON
@@ -106,14 +115,22 @@ class BackupManager(
                 return@withContext BackupResult.Error("No passwords to backup")
             }
 
-            // Create backup data
+            // Create backup data with v2.0 quantum encryption
             val passwordsJson = gson.toJson(passwords)
-            val encryptedData = backupEncryption.encrypt(passwordsJson, password)
+            val encryptedData = quantumBackupEncryption.encrypt(passwordsJson, password)
+
+            // Get encryption metadata
+            val metadata = quantumBackupEncryption.getEncryptionMetadata()
 
             val backupData = BackupData(
+                version = "2.0",
                 timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(Date()),
                 passwordCount = passwords.size,
-                data = encryptedData
+                data = encryptedData,
+                encryptionType = metadata["encryptionType"],
+                kdf = metadata["kdf"],
+                iterations = metadata["iterations"]?.toIntOrNull(),
+                quantumResistant = metadata["quantumResistant"]?.toBoolean()
             )
 
             val backupJson = gson.toJson(backupData)
@@ -244,9 +261,25 @@ class BackupManager(
                 }
             }
 
-            // Decrypt the password data
+            // Decrypt the password data using version-based routing
             val decryptedJson = try {
-                backupEncryption.decrypt(encryptedData, password)
+                when (backupData?.version) {
+                    "2.0" -> {
+                        // v2.0: Use quantum-resistant encryption
+                        Log.d(TAG, "Using quantum-resistant decryption for v2.0 backup")
+                        quantumBackupEncryption.decrypt(encryptedData, password)
+                    }
+                    "1.0", null -> {
+                        // v1.0 or legacy: Use original PBKDF2 + AES-CBC encryption
+                        Log.d(TAG, "Using legacy decryption for v1.0 backup")
+                        backupEncryption.decrypt(encryptedData, password)
+                    }
+                    else -> {
+                        // Unknown version
+                        Log.w(TAG, "Unknown backup version: ${backupData.version}, attempting legacy decryption")
+                        backupEncryption.decrypt(encryptedData, password)
+                    }
+                }
             } catch (e: DecryptionException) {
                 Log.w(TAG, "Failed to decrypt backup - invalid password")
                 return RestoreResult.InvalidPassword()

@@ -85,6 +85,24 @@ android {
         compose = true
         buildConfig = true
     }
+
+    packaging {
+        resources {
+            // Exclude conflicting META-INF files from Bouncy Castle
+            excludes += setOf(
+                "META-INF/versions/9/OSGI-INF/MANIFEST.MF",
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/license.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/notice.txt",
+                "META-INF/ASL2.0",
+                "META-INF/*.kotlin_module"
+            )
+        }
+    }
 }
 
 dependencies {
@@ -135,6 +153,9 @@ dependencies {
 
     // For encryption
     implementation(libs.androidx.security.crypto)
+
+    // Bouncy Castle for post-quantum cryptography
+    implementation("org.bouncycastle:bcprov-jdk18on:1.79")
 
     // For file picking
     implementation(libs.androidx.activity.compose.v182)
