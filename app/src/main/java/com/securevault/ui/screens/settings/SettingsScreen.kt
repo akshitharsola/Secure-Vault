@@ -30,6 +30,8 @@ import com.securevault.ui.components.BackupDialog
 import com.securevault.ui.components.ColorPicker
 import com.securevault.ui.components.PinSetupDialog
 import com.securevault.ui.components.RestoreDialog
+import com.securevault.utils.DownloadState
+import com.securevault.utils.FileManager
 import com.securevault.utils.ThemeManager
 import com.securevault.utils.UpdateManager
 import kotlinx.coroutines.launch
@@ -58,6 +60,7 @@ fun SettingsScreen(navController: NavController) {
     // Update states
     val updateInfo by updateManager.updateInfo
     val isCheckingForUpdates by updateManager.isCheckingForUpdates
+    val downloadState by viewModel.downloadState.collectAsState()
 
     // Expandable sections state
     var isBasicThemeExpanded by remember { mutableStateOf(false) }
@@ -90,6 +93,11 @@ fun SettingsScreen(navController: NavController) {
         val biometricManager = BiometricManager.from(context)
         val result = biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)
         result == BiometricManager.BIOMETRIC_SUCCESS
+    }
+
+    // Check and resume download on screen load
+    LaunchedEffect(Unit) {
+        viewModel.checkAndResumeDownload()
     }
 
     // Helper function to open URLs
@@ -596,36 +604,112 @@ fun SettingsScreen(navController: NavController) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                 // Check for Updates
+                val fileManager = remember { FileManager(context) }
                 ListItem(
                     headlineContent = { Text("Check for Updates") },
                     supportingContent = {
-                        when {
-                            isCheckingForUpdates -> Text("Checking for updates...")
-                            updateInfo.isUpdateAvailable -> Text("Update available: v${updateInfo.latestVersion}")
-                            else -> Text("You're using the latest version")
-                        }
-                    },
-                    leadingContent = {
-                        if (isCheckingForUpdates) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                        } else {
-                            Icon(
-                                if (updateInfo.isUpdateAvailable) Icons.Default.SystemUpdate else Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = if (updateInfo.isUpdateAvailable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    },
-                    trailingContent = {
-                        if (updateInfo.isUpdateAvailable) {
-                            Button(
-                                onClick = { showUpdateDialog = true }
-                            ) {
-                                Text("Update")
+                        when (downloadState) {
+                            is DownloadState.Downloading -> {
+                                val state = downloadState as DownloadState.Downloading
+                                Column {
+                                    Text("Downloading v${updateInfo.latestVersion}")
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    LinearProgressIndicator(
+                                        progress = { state.progress / 100f },
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        "${state.progress}% - ${fileManager.formatBytes(state.bytesDownloaded)}/${fileManager.formatBytes(state.totalBytes)}",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
+                            is DownloadState.Completed -> {
+                                Text("Ready to install v${updateInfo.latestVersion}")
+                            }
+                            is DownloadState.Failed -> {
+                                val errorMsg = (downloadState as DownloadState.Failed).error
+                                Text(
+                                    "Download failed: $errorMsg",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                            is DownloadState.Installing -> {
+                                Text("Installing update...")
+                            }
+                            else -> {
+                                when {
+                                    isCheckingForUpdates -> Text("Checking for updates...")
+                                    updateInfo.isUpdateAvailable -> Text("Update available: v${updateInfo.latestVersion}")
+                                    else -> Text("You're using the latest version")
+                                }
                             }
                         }
                     },
-                    modifier = Modifier.clickable(enabled = !isCheckingForUpdates) {
+                    leadingContent = {
+                        when (downloadState) {
+                            is DownloadState.Downloading, is DownloadState.Installing -> {
+                                CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            }
+                            else -> {
+                                if (isCheckingForUpdates) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                } else {
+                                    Icon(
+                                        when {
+                                            downloadState is DownloadState.Completed -> Icons.Default.CheckCircle
+                                            downloadState is DownloadState.Failed -> Icons.Default.Error
+                                            updateInfo.isUpdateAvailable -> Icons.Default.SystemUpdate
+                                            else -> Icons.Default.CheckCircle
+                                        },
+                                        contentDescription = null,
+                                        tint = when {
+                                            downloadState is DownloadState.Failed -> MaterialTheme.colorScheme.error
+                                            else -> MaterialTheme.colorScheme.primary
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    trailingContent = {
+                        when (downloadState) {
+                            is DownloadState.Idle -> {
+                                if (updateInfo.isUpdateAvailable) {
+                                    Button(
+                                        onClick = { showUpdateDialog = true }
+                                    ) {
+                                        Text("Download")
+                                    }
+                                }
+                            }
+                            is DownloadState.Downloading -> {
+                                IconButton(onClick = { viewModel.cancelDownload() }) {
+                                    Icon(Icons.Default.Close, contentDescription = "Cancel")
+                                }
+                            }
+                            is DownloadState.Completed -> {
+                                val filePath = (downloadState as DownloadState.Completed).filePath
+                                Button(
+                                    onClick = { viewModel.installUpdate(filePath) }
+                                ) {
+                                    Text("Install")
+                                }
+                            }
+                            is DownloadState.Failed -> {
+                                Button(
+                                    onClick = { showUpdateDialog = true }
+                                ) {
+                                    Text("Retry")
+                                }
+                            }
+                            else -> {}
+                        }
+                    },
+                    modifier = Modifier.clickable(
+                        enabled = !isCheckingForUpdates && downloadState is DownloadState.Idle
+                    ) {
                         scope.launch {
                             updateManager.checkForUpdates()
                         }
@@ -633,7 +717,7 @@ fun SettingsScreen(navController: NavController) {
                 )
 
                 // Update notification if available
-                if (updateInfo.isUpdateAvailable) {
+                if (updateInfo.isUpdateAvailable && downloadState is DownloadState.Idle) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Card(
                         colors = CardDefaults.cardColors(
@@ -801,7 +885,7 @@ fun SettingsScreen(navController: NavController) {
             confirmButton = {
                 Button(
                     onClick = {
-                        updateManager.downloadUpdate(updateInfo.downloadUrl)
+                        viewModel.startDownload(updateInfo.downloadUrl, updateInfo.latestVersion)
                         showUpdateDialog = false
                     }
                 ) {

@@ -14,4 +14,9 @@
     <external-files-path
         name="external_backup_files"
         path="backups/" />
+
+    <!-- External files directory for app updates -->
+    <external-files-path
+        name="update_files"
+        path="Downloads/SecureVault_Updates/" />
 </paths>
