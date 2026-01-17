@@ -18,8 +18,10 @@ import com.securevault.domain.usecase.DeleteAllPasswordsUseCase
 import com.securevault.domain.usecase.RestoreBackupUseCase
 import com.securevault.utils.BackupLocationInfo
 import com.securevault.utils.BackupManager
+import com.securevault.utils.DownloadState
 import com.securevault.utils.EnhancedBackupResult
 import com.securevault.utils.ThemeManager
+import com.securevault.utils.UpdateManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +31,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val biometricHelper = AppModule.provideBiometricHelper(application)
     private val themeManager = AppModule.provideThemeManager(application)
+    private val updateManager = AppModule.provideUpdateManager(application)
 
     // Enhanced backup manager with external storage support
     private val backupManager = AppModule.provideBackupManager(application)
@@ -375,5 +378,31 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         } else {
             "Internal storage only"
         }
+    }
+
+    // Update management methods
+    val downloadState: StateFlow<DownloadState> = updateManager.downloadState
+
+    fun startDownload(downloadUrl: String, version: String) {
+        viewModelScope.launch {
+            updateManager.downloadUpdate(downloadUrl, version)
+        }
+    }
+
+    fun cancelDownload() {
+        updateManager.cancelDownload()
+    }
+
+    fun installUpdate(filePath: String) {
+        updateManager.installUpdate(filePath)
+    }
+
+    fun checkAndResumeDownload() {
+        updateManager.checkAndResumeDownload(viewModelScope)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        updateManager.unregisterDownloadReceiver()
     }
 }

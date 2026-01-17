@@ -73,6 +73,7 @@ import androidx.navigation.NavController
 import com.securevault.data.model.Password
 import com.securevault.di.AppModule
 import com.securevault.ui.navigation.Screen
+import com.securevault.utils.DownloadState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,6 +91,7 @@ fun MainScreen(navController: NavController) {
     val isAuthenticated by viewModel.isAuthenticated.collectAsState()
     val error by viewModel.error.collectAsState()
     val updateInfo by updateManager.updateInfo
+    val downloadState by updateManager.downloadState.collectAsState()
     var showSearch by remember { mutableStateOf(false) }
     var showDeleteAllDialog by remember { mutableStateOf(false) }
     var showUpdateNotification by remember { mutableStateOf(false) }
@@ -230,12 +232,25 @@ fun MainScreen(navController: NavController) {
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "Update Available",
+                                    text = when (downloadState) {
+                                        is DownloadState.Downloading -> "Downloading Update"
+                                        is DownloadState.Completed -> "Update Ready to Install"
+                                        is DownloadState.Failed -> "Update Download Failed"
+                                        else -> "Update Available"
+                                    },
                                     style = MaterialTheme.typography.titleSmall,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Text(
-                                    text = "Version ${updateInfo.latestVersion} is ready",
+                                    text = when (downloadState) {
+                                        is DownloadState.Downloading -> {
+                                            val state = downloadState as DownloadState.Downloading
+                                            "Version ${updateInfo.latestVersion} - ${state.progress}%"
+                                        }
+                                        is DownloadState.Completed -> "Tap to install version ${updateInfo.latestVersion}"
+                                        is DownloadState.Failed -> "Tap to retry download"
+                                        else -> "Version ${updateInfo.latestVersion} is ready"
+                                    },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )

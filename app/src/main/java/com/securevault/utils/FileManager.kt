@@ -332,6 +332,80 @@ class FileManager(private val context: Context) {
             }
         }
     }
+
+    /**
+     * Checks if there's enough storage space for an update
+     * @param directory The directory where the file will be saved
+     * @param requiredBytes The estimated size needed
+     * @return true if enough space is available
+     */
+    fun hasEnoughSpaceForUpdate(directory: File, requiredBytes: Long): Boolean {
+        return try {
+            val stat = android.os.StatFs(directory.path)
+            val availableBytes = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                stat.availableBytes
+            } else {
+                @Suppress("DEPRECATION")
+                stat.availableBlocks.toLong() * stat.blockSize.toLong()
+            }
+
+            // Require 1.5x the estimated size as buffer
+            availableBytes > (requiredBytes * 1.5)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking storage space", e)
+            true // Assume enough space if we can't check
+        }
+    }
+
+    /**
+     * Formats bytes to human-readable size
+     * @param bytes The number of bytes
+     * @return Formatted string (e.g., "8.2 MB")
+     */
+    fun formatBytes(bytes: Long): String {
+        return when {
+            bytes < 1024 -> "$bytes B"
+            bytes < 1024 * 1024 -> String.format("%.1f KB", bytes / 1024.0)
+            bytes < 1024 * 1024 * 1024 -> String.format("%.1f MB", bytes / (1024.0 * 1024.0))
+            else -> String.format("%.2f GB", bytes / (1024.0 * 1024.0 * 1024.0))
+        }
+    }
+
+    /**
+     * Verifies APK file integrity
+     * @param file The APK file to verify
+     * @param expectedSize Optional expected file size
+     * @return true if the APK is valid
+     */
+    fun verifyApkIntegrity(file: File, expectedSize: Long? = null): Boolean {
+        try {
+            if (!file.exists()) {
+                Log.e(TAG, "APK file does not exist: ${file.absolutePath}")
+                return false
+            }
+
+            // Check file size if provided
+            if (expectedSize != null && file.length() != expectedSize) {
+                Log.e(TAG, "APK file size mismatch. Expected: $expectedSize, Actual: ${file.length()}")
+                return false
+            }
+
+            // Verify it's a valid APK by checking package info
+            val pm = context.packageManager
+            val packageInfo = pm.getPackageArchiveInfo(file.absolutePath, 0)
+
+            if (packageInfo == null) {
+                Log.e(TAG, "APK file is corrupted or invalid")
+                return false
+            }
+
+            Log.i(TAG, "APK verification successful: ${file.name}")
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error verifying APK integrity", e)
+            return false
+        }
+    }
 }
 
 /**
