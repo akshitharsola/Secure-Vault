@@ -57,7 +57,8 @@ data class UpdateInfo(
 
 class UpdateManager(private val context: Context) {
     companion object {
-        private const val GITHUB_API_URL = "https://api.github.com/repos/akshitharsola/Secure-Vault/releases/latest"
+        private const val GITHUB_REPO = "akshitharsola/Secure-Vault"
+        private const val GITHUB_API_URL = "https://api.github.com/repos/$GITHUB_REPO/releases/latest"
         private const val UPDATE_CHECK_TIMEOUT = 10000 // 10 seconds
         private const val TAG = "UpdateManager"
         private const val UPDATE_DIR_NAME = "SecureVault_Updates"
@@ -322,8 +323,11 @@ class UpdateManager(private val context: Context) {
                 Log.d(TAG, "Starting download - URL: $downloadUrl, Version: $version")
 
                 if (downloadUrl.isBlank()) {
-                    Log.e(TAG, "Download URL is blank")
-                    _downloadState.value = DownloadState.Failed("Download URL not available")
+                    Log.e(TAG, "Download URL is blank - falling back to GitHub releases page")
+                    // Fallback: Open GitHub releases page in browser
+                    val githubReleasesUrl = "https://github.com/$GITHUB_REPO/releases/latest"
+                    openDownloadInBrowser(githubReleasesUrl)
+                    _downloadState.value = DownloadState.Idle
                     return@withContext false
                 }
 
