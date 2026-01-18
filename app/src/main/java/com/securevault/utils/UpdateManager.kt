@@ -116,14 +116,23 @@ class UpdateManager(private val context: Context) {
                     val latestVersion = latestReleaseInfo.getString("tag_name").removePrefix("v")
                     val isUpdateAvailable = isVersionNewer(latestVersion, currentVersion)
 
+                    Log.d(TAG, "=== UPDATE CHECK DEBUG ===")
+                    Log.d(TAG, "Current version: $currentVersion")
+                    Log.d(TAG, "Latest version: $latestVersion")
+                    Log.d(TAG, "Update available: $isUpdateAvailable")
+
                     val downloadUrl = getPreferredDownloadUrl(latestReleaseInfo)
 
-                    // Log if download URL is empty
+                    // Enhanced logging for download URL
                     if (downloadUrl.isEmpty()) {
-                        Log.e(TAG, "Download URL is empty! Release info: ${latestReleaseInfo.toString(2)}")
+                        Log.e(TAG, "❌ Download URL is EMPTY!")
+                        Log.e(TAG, "Full release JSON:")
+                        Log.e(TAG, latestReleaseInfo.toString(2))
                     } else {
-                        Log.i(TAG, "Update check complete: v$currentVersion -> v$latestVersion, downloadUrl: $downloadUrl")
+                        Log.i(TAG, "✅ Download URL found: $downloadUrl")
+                        Log.i(TAG, "Update check complete: v$currentVersion -> v$latestVersion")
                     }
+                    Log.d(TAG, "=== END UPDATE CHECK DEBUG ===")
 
                     val releaseNotes = latestReleaseInfo.getString("body")
 
@@ -351,16 +360,32 @@ class UpdateManager(private val context: Context) {
 
                 // Create download request
                 val fileName = "SecureVault_v$version.apk"
-                val destinationFile = File(updateDir, fileName)
+
+                Log.d(TAG, "Preparing download request:")
+                Log.d(TAG, "  URL: $downloadUrl")
+                Log.d(TAG, "  File: $fileName")
 
                 val request = DownloadManager.Request(Uri.parse(downloadUrl)).apply {
                     setTitle("SecureVault Update")
                     setDescription("Downloading SecureVault v$version")
                     setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    setDestinationUri(Uri.fromFile(destinationFile))
+
+                    // Use setDestinationInExternalFilesDir for better compatibility with Android 10+
+                    setDestinationInExternalFilesDir(
+                        context,
+                        Environment.DIRECTORY_DOWNLOADS,
+                        "$UPDATE_DIR_NAME/$fileName"
+                    )
+
                     setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+                    setAllowedOverRoaming(false)
                     setMimeType("application/vnd.android.package-archive")
+
+                    // Add headers to ensure we can follow redirects
+                    addRequestHeader("User-Agent", "SecureVault/${android.os.Build.VERSION.SDK_INT}")
                 }
+
+                Log.d(TAG, "Download request created successfully")
 
                 // Enqueue download
                 val downloadId = downloadManager.enqueue(request)

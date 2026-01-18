@@ -15,8 +15,8 @@ android {
         applicationId = "com.securevault"
         minSdk = 24
         targetSdk = 35
-        versionCode = 19
-        versionName = "2.0.2"
+        versionCode = 20
+        versionName = "2.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
