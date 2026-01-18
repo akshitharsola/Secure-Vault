@@ -119,41 +119,15 @@ When you launch v2.0 for the first time:
 
 SecureVault follows Clean Architecture with clear separation of concerns:
 
-```
-┌──────────────────────────────────────────────────┐
-│                 UI Layer                         │
-│  ┌──────────────┐  ┌──────────────────────────┐ │
-│  │   Screens    │  │      ViewModels         │ │
-│  │  (Compose)   │  │  (State Management)     │ │
-│  └──────────────┘  └──────────────────────────┘ │
-└──────────────────────────────────────────────────┘
-                      ▼
-┌──────────────────────────────────────────────────┐
-│               Domain Layer                       │
-│  ┌────────────────────────────────────────────┐ │
-│  │           Use Cases                        │ │
-│  │      (Business Logic)                      │ │
-│  └────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────┘
-                      ▼
-┌──────────────────────────────────────────────────┐
-│                Data Layer                        │
-│  ┌──────────────┐  ┌──────────────────────────┐ │
-│  │  Repository  │  │   Local Database        │ │
-│  │ (Encrypted)  │  │ (Room + Keystore)       │ │
-│  └──────────────┘  └──────────────────────────┘ │
-└──────────────────────────────────────────────────┘
-                      ▼
-┌──────────────────────────────────────────────────┐
-│              Security Layer                      │
-│  ┌────────────────────────────────────────────┐ │
-│  │    SecurityManager (Android Keystore)     │ │
-│  │    - AES-256-GCM encryption               │ │
-│  │    - Hardware-backed key storage          │ │
-│  │    - Automatic IV generation              │ │
-│  └────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────┘
-```
+<div align="center">
+  <img src="Screenshots/architecture_diagram.png" alt="SecureVault Architecture" width="600"/>
+</div>
+
+The architecture consists of four distinct layers:
+- **UI Layer**: Jetpack Compose screens with ViewModels for state management
+- **Domain Layer**: Business logic encapsulated in use cases
+- **Data Layer**: Repository pattern with encrypted data access (Room + Keystore)
+- **Security Layer**: Hardware-backed encryption via Android Keystore (AES-256-GCM)
 
 ### Key Components
 
