@@ -1,6 +1,10 @@
 MIT License
 
-Copyright (c) 2024 SecureVault Android
+Copyright (c) 2024-2026 Akshit Harsola and Contributors
+
+Contributors:
+- Akshit Harsola (@akshitharsola) - Original author and maintainer
+- Claude Sonnet 4.5 (Anthropic) - AI pair programming assistant
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,17 +26,46 @@ SOFTWARE.
 
 ADDITIONAL SECURITY DISCLAIMER:
 
-This software is a password manager application designed to store sensitive 
-information. While the developers have implemented security best practices 
-including AES encryption, Android Keystore integration, and biometric 
-authentication, users should:
+This software is a password manager application designed to store sensitive
+information. While the developers have implemented security best practices
+including:
+
+- Hardware-backed AES-256-GCM encryption via Android Keystore
+- Quantum-resistant backup encryption (ML-KEM-768 + X25519)
+- Biometric authentication with PIN fallback
+- Automatic migration from plain text to encrypted storage
+- Transaction-safe backup restore with rollback capability
+- GCM authentication tags for tamper detection
+
+Users should understand:
 
 1. Review the source code and security implementation before use
-2. Understand that no software is 100% secure
-3. Maintain regular backups of their data
-4. Use this software at their own risk and discretion
-5. Report any security vulnerabilities responsibly
+2. No software is 100% secure against all threats
+3. Maintain regular encrypted backups of their data
+4. Use strong, unique passwords/PINs for backup encryption
+5. Keep devices updated with latest security patches
+6. Report any security vulnerabilities responsibly to:
+   https://github.com/akshitharsola/Secure-Vault/security
+7. This is open-source software provided as-is
 
-The developers make no warranties regarding the security of data stored 
-within this application and shall not be liable for any data loss, 
-unauthorized access, or security breaches that may occur.
+The developers make no warranties regarding the security of data stored
+within this application and shall not be liable for any data loss,
+unauthorized access, or security breaches that may occur. Users assume
+all risks associated with storing sensitive information in this application.
+
+RESPONSIBLE DISCLOSURE:
+
+If you discover a security vulnerability, please:
+- Do NOT open a public GitHub issue
+- Report privately via GitHub Security Advisories
+- Allow reasonable time for fixes before public disclosure
+- We appreciate responsible security researchers
+
+QUANTUM SECURITY NOTE:
+
+While v2.0+ implements quantum-resistant encryption for backups using
+NIST-standardized algorithms (ML-KEM-768), users should be aware that:
+- Database encryption uses classical AES-256-GCM (secure for now)
+- Quantum computers capable of breaking AES-256 do not yet exist
+- Future updates may add quantum-resistant database encryption
+- Regular backups using v2.0 format provide quantum-resistant archival
