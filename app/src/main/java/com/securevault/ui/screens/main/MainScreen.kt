@@ -63,10 +63,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.BackHandler
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -125,6 +129,12 @@ fun MainScreen(navController: NavController) {
         if (updateInfo.isUpdateAvailable) {
             showUpdateNotification = true
         }
+    }
+
+    // Handle back button press when in search mode
+    BackHandler(enabled = showSearch) {
+        showSearch = false
+        viewModel.updateSearchQuery("") // Clear search when pressing back
     }
 
     Scaffold(
@@ -369,12 +379,23 @@ fun SearchTopAppBar(
     onQueryChange: (String) -> Unit,
     onClose: () -> Unit
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // Auto-focus and show keyboard when search opens
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+        keyboardController?.show()
+    }
+
     TopAppBar(
         title = {
             TextField(
                 value = query,
                 onValueChange = onQueryChange,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
                 placeholder = { Text("Search passwords...") },
                 singleLine = true,
                 leadingIcon = {
