@@ -63,19 +63,19 @@ class SecurityManager(private val context: Context) {
         return try {
             val key = getOrCreateKey()
 
-            // Generate random IV (12 bytes for GCM)
-            val iv = ByteArray(IV_LENGTH)
-            java.security.SecureRandom().nextBytes(iv)
-
             // Encrypt with AES-GCM
+            // Android Keystore automatically generates IV when setRandomizedEncryptionRequired(true)
             val cipher = Cipher.getInstance(TRANSFORMATION)
-            cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(GCM_TAG_LENGTH, iv))
+            cipher.init(Cipher.ENCRYPT_MODE, key)
+
+            // Get the auto-generated IV from the cipher
+            val iv = cipher.iv
             val encrypted = cipher.doFinal(text.toByteArray(Charsets.UTF_8))
 
             // Combine IV + encrypted data (encrypted data includes GCM auth tag)
-            val combined = ByteArray(IV_LENGTH + encrypted.size)
-            System.arraycopy(iv, 0, combined, 0, IV_LENGTH)
-            System.arraycopy(encrypted, 0, combined, IV_LENGTH, encrypted.size)
+            val combined = ByteArray(iv.size + encrypted.size)
+            System.arraycopy(iv, 0, combined, 0, iv.size)
+            System.arraycopy(encrypted, 0, combined, iv.size, encrypted.size)
 
             Base64.encodeToString(combined, Base64.NO_WRAP)
         } catch (e: Exception) {
