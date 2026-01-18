@@ -114,11 +114,18 @@ class UpdateManager(private val context: Context) {
                 if (latestReleaseInfo != null) {
                     val latestVersion = latestReleaseInfo.getString("tag_name").removePrefix("v")
                     val isUpdateAvailable = isVersionNewer(latestVersion, currentVersion)
-                    
+
                     val downloadUrl = getPreferredDownloadUrl(latestReleaseInfo)
-                    
+
+                    // Log if download URL is empty
+                    if (downloadUrl.isEmpty()) {
+                        Log.e(TAG, "Download URL is empty! Release info: ${latestReleaseInfo.toString(2)}")
+                    } else {
+                        Log.i(TAG, "Update check complete: v$currentVersion -> v$latestVersion, downloadUrl: $downloadUrl")
+                    }
+
                     val releaseNotes = latestReleaseInfo.getString("body")
-                    
+
                     val updateInfo = UpdateInfo(
                         isUpdateAvailable = isUpdateAvailable,
                         latestVersion = latestVersion,
@@ -127,10 +134,11 @@ class UpdateManager(private val context: Context) {
                         releaseNotes = releaseNotes,
                         isForceUpdate = false // Can be implemented based on specific criteria
                     )
-                    
+
                     _updateInfo.value = updateInfo
                     updateInfo
                 } else {
+                    Log.e(TAG, "Failed to fetch latest release info from GitHub API")
                     val updateInfo = UpdateInfo(
                         currentVersion = currentVersion,
                         isUpdateAvailable = false
@@ -152,56 +160,86 @@ class UpdateManager(private val context: Context) {
     }
 
     private fun getPreferredDownloadUrl(releaseInfo: JSONObject): String {
-        val assets = releaseInfo.getJSONArray("assets")
-        
-        // Look for release APK first, then fall back to debug APK
-        for (i in 0 until assets.length()) {
-            val asset = assets.getJSONObject(i)
-            val assetName = asset.getString("name")
-            
-            // Prefer release APK over debug APK
-            if (assetName.contains("app-release.apk", ignoreCase = true)) {
-                return asset.getString("browser_download_url")
+        return try {
+            val assets = releaseInfo.getJSONArray("assets")
+            Log.d(TAG, "Found ${assets.length()} assets in release")
+
+            // Look for release APK first, then fall back to debug APK
+            for (i in 0 until assets.length()) {
+                val asset = assets.getJSONObject(i)
+                val assetName = asset.getString("name")
+                Log.d(TAG, "Checking asset: $assetName")
+
+                // Prefer release APK over debug APK
+                if (assetName.contains("app-release.apk", ignoreCase = true)) {
+                    val downloadUrl = asset.getString("browser_download_url")
+                    Log.i(TAG, "Found release APK: $downloadUrl")
+                    return downloadUrl
+                }
             }
-        }
-        
-        // Fall back to first APK if no release APK found
-        for (i in 0 until assets.length()) {
-            val asset = assets.getJSONObject(i)
-            val assetName = asset.getString("name")
-            
-            if (assetName.endsWith(".apk", ignoreCase = true)) {
-                return asset.getString("browser_download_url")
+
+            // Fall back to first APK if no release APK found
+            for (i in 0 until assets.length()) {
+                val asset = assets.getJSONObject(i)
+                val assetName = asset.getString("name")
+
+                if (assetName.endsWith(".apk", ignoreCase = true)) {
+                    val downloadUrl = asset.getString("browser_download_url")
+                    Log.i(TAG, "Found APK (fallback): $downloadUrl")
+                    return downloadUrl
+                }
             }
-        }
-        
-        // Final fallback to first asset
-        return if (assets.length() > 0) {
-            assets.getJSONObject(0).getString("browser_download_url")
-        } else {
+
+            // Final fallback to first asset
+            val result = if (assets.length() > 0) {
+                val downloadUrl = assets.getJSONObject(0).getString("browser_download_url")
+                Log.w(TAG, "Using first asset as fallback: $downloadUrl")
+                downloadUrl
+            } else {
+                Log.e(TAG, "No assets found in release!")
+                ""
+            }
+            result
+        } catch (e: Exception) {
+            Log.e(TAG, "Error extracting download URL from release info", e)
             ""
         }
     }
 
     private fun fetchLatestReleaseInfo(): JSONObject? {
         return try {
+            Log.d(TAG, "Fetching latest release from: $GITHUB_API_URL")
             val url = URL(GITHUB_API_URL)
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.connectTimeout = UPDATE_CHECK_TIMEOUT
             connection.readTimeout = UPDATE_CHECK_TIMEOUT
             connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
-            
+
             val responseCode = connection.responseCode
+            Log.d(TAG, "GitHub API response code: $responseCode")
+
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 val reader = BufferedReader(InputStreamReader(connection.inputStream))
                 val response = reader.readText()
                 reader.close()
+                Log.d(TAG, "Successfully fetched release info (${response.length} chars)")
                 JSONObject(response)
             } else {
+                Log.e(TAG, "GitHub API returned error code: $responseCode")
+                // Try to read error response
+                try {
+                    val errorReader = BufferedReader(InputStreamReader(connection.errorStream))
+                    val errorResponse = errorReader.readText()
+                    errorReader.close()
+                    Log.e(TAG, "Error response: $errorResponse")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Could not read error response", e)
+                }
                 null
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Exception fetching latest release info", e)
             null
         }
     }
