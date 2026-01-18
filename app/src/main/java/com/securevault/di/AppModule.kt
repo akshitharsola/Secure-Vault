@@ -10,6 +10,7 @@ import com.securevault.domain.usecase.*
 import com.securevault.utils.BackupManager
 import com.securevault.utils.BiometricHelper
 import com.securevault.utils.ClipboardManager
+import com.securevault.utils.MigrationManager
 import com.securevault.utils.SecurityManager
 import com.securevault.utils.ThemeManager
 import com.securevault.utils.UpdateManager
@@ -38,7 +39,8 @@ object AppModule {
     fun providePasswordRepository(context: Context): PasswordRepository {
         return repository ?: synchronized(this) {
             repository ?: PasswordRepositoryImpl(
-                providePasswordDatabase(context).passwordDao()
+                passwordDao = providePasswordDatabase(context).passwordDao(),
+                securityManager = provideSecurityManager(context)
             ).also { repository = it }
         }
     }
@@ -109,5 +111,14 @@ object AppModule {
 
     fun provideValidateBackupFileUseCase(context: Context): ValidateBackupFileUseCase {
         return ValidateBackupFileUseCase(provideBackupManager(context))
+    }
+
+    // Migration manager for database encryption migration
+    fun provideMigrationManager(context: Context): MigrationManager {
+        return MigrationManager(
+            context = context,
+            passwordDao = providePasswordDatabase(context).passwordDao(),
+            securityManager = provideSecurityManager(context)
+        )
     }
 }
