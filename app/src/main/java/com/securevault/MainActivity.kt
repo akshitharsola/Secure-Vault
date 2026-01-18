@@ -14,6 +14,10 @@ import com.securevault.di.AppModule
 import com.securevault.ui.components.PinEntryDialog
 import com.securevault.ui.navigation.AppNavigation
 import com.securevault.ui.theme.SecureAttendTheme
+import com.securevault.utils.MigrationResult
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
@@ -26,6 +30,27 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Run database encryption migration if needed
+        // This is a critical security fix that migrates from plain text to encrypted passwords
+        val migrationManager = AppModule.provideMigrationManager(applicationContext)
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            val result = migrationManager.checkAndMigrateIfNeeded()
+            when (result) {
+                is MigrationResult.Success -> {
+                    android.util.Log.i("MainActivity", "Migration successful: ${result.migratedCount} passwords encrypted")
+                }
+                is MigrationResult.PartialSuccess -> {
+                    android.util.Log.w("MainActivity", "Migration partial: ${result.migratedCount} succeeded, ${result.errorCount} failed")
+                }
+                is MigrationResult.AlreadyMigrated -> {
+                    android.util.Log.d("MainActivity", "Migration already completed previously")
+                }
+                is MigrationResult.Failure -> {
+                    android.util.Log.e("MainActivity", "Migration failed: ${result.error}")
+                }
+            }
+        }
 
         // Check if this is a theme change from intent or saved state
         val isThemeChangeFromIntent = intent.getBooleanExtra(EXTRA_IS_THEME_CHANGE, false)
