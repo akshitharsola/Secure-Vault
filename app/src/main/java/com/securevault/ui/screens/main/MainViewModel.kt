@@ -22,7 +22,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val searchPasswordsUseCase = AppModule.provideSearchPasswordsUseCase(application)
     private val deleteAllPasswordsUseCase = AppModule.provideDeleteAllPasswordsUseCase(application)
     private val biometricHelper = AppModule.provideBiometricHelper(application)
-    private val adManager = AppModule.provideAdManager(application)
 
 
     // UI states
@@ -37,9 +36,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
-
-    // Ad state from AdManager
-    val nativeAds = adManager.nativeAds
 
     // Get password flow from use case
     val passwords = getPasswordsUseCase().stateIn(
@@ -165,11 +161,5 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearError() {
         _error.value = null
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        // Clean up ads to prevent memory leaks
-        adManager.cleanup()
     }
 }
