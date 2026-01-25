@@ -50,6 +50,11 @@
             </intent-filter>
         </activity>
 
+        <!-- AdMob App ID -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-8596687606423153~7634407737"/>
+
         <!-- FileProvider for backup sharing -->
         <provider
             android:name="androidx.core.content.FileProvider"

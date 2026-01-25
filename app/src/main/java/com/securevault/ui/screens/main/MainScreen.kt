@@ -76,8 +76,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.securevault.data.model.Password
 import com.securevault.di.AppModule
+import com.securevault.ui.components.NativeAdCardCompose
 import com.securevault.ui.navigation.Screen
 import com.securevault.utils.DownloadState
+import com.google.android.gms.ads.nativead.NativeAd
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,6 +98,7 @@ fun MainScreen(navController: NavController) {
     val error by viewModel.error.collectAsState()
     val updateInfo by updateManager.updateInfo
     val downloadState by updateManager.downloadState.collectAsState()
+    val nativeAds by viewModel.nativeAds.collectAsState()
     var showSearch by remember { mutableStateOf(false) }
     var showDeleteAllDialog by remember { mutableStateOf(false) }
     var showUpdateNotification by remember { mutableStateOf(false) }
@@ -307,6 +310,7 @@ fun MainScreen(navController: NavController) {
                 } else {
                     PasswordList(
                         passwords = filteredPasswords,
+                        nativeAds = nativeAds,
                         onPasswordClick = { password ->
                             navController.navigate(Screen.Detail.createRoute(password.id))
                         }
@@ -474,8 +478,29 @@ fun EmptyState(onAddClick: () -> Unit) {
 @Composable
 fun PasswordList(
     passwords: List<Password>,
+    nativeAds: List<NativeAd>,
     onPasswordClick: (Password) -> Unit
 ) {
+    /**
+     * Ad Frequency Logic:
+     * - No ads if < 5 passwords
+     * - One ad at position 5 if 5-14 passwords
+     * - Every 8 items for larger lists
+     */
+    val shouldShowAds = passwords.size >= 5 && nativeAds.isNotEmpty()
+
+    // Calculate total items including ads
+    val totalItems = if (shouldShowAds) {
+        val adCount = when {
+            passwords.size < 5 -> 0
+            passwords.size <= 14 -> 1
+            else -> (passwords.size / 8)
+        }
+        passwords.size + adCount
+    } else {
+        passwords.size
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
@@ -487,15 +512,77 @@ fun PasswordList(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(
-            items = passwords,
-            key = { it.id ?: "" } // ID should never be null (generated if missing)
-        ) { password ->
-            PasswordItem(
-                password = password,
-                onClick = { onPasswordClick(password) }
-            )
+            count = totalItems,
+            key = { index ->
+                if (shouldShowAds) {
+                    val adPositions = calculateAdPositions(passwords.size)
+                    if (adPositions.contains(index)) {
+                        "ad_$index"
+                    } else {
+                        val passwordIndex = getPasswordIndexForPosition(index, adPositions)
+                        passwords.getOrNull(passwordIndex)?.id ?: "password_$index"
+                    }
+                } else {
+                    passwords.getOrNull(index)?.id ?: "password_$index"
+                }
+            }
+        ) { index ->
+            if (shouldShowAds) {
+                val adPositions = calculateAdPositions(passwords.size)
+                if (adPositions.contains(index)) {
+                    // Display ad
+                    val adIndex = adPositions.indexOf(index)
+                    nativeAds.getOrNull(adIndex)?.let { ad ->
+                        NativeAdCardCompose(nativeAd = ad)
+                    }
+                } else {
+                    // Display password
+                    val passwordIndex = getPasswordIndexForPosition(index, adPositions)
+                    passwords.getOrNull(passwordIndex)?.let { password ->
+                        PasswordItem(
+                            password = password,
+                            onClick = { onPasswordClick(password) }
+                        )
+                    }
+                }
+            } else {
+                // No ads, display passwords normally
+                passwords.getOrNull(index)?.let { password ->
+                    PasswordItem(
+                        password = password,
+                        onClick = { onPasswordClick(password) }
+                    )
+                }
+            }
         }
     }
+}
+
+/**
+ * Calculate positions where ads should be inserted
+ *
+ * Logic:
+ * - If 5-14 passwords: ad at position 5
+ * - If 15+ passwords: ads every 8 items (positions 8, 16, 24, etc.)
+ */
+private fun calculateAdPositions(passwordCount: Int): List<Int> {
+    if (passwordCount < 5) return emptyList()
+
+    return if (passwordCount <= 14) {
+        listOf(5) // Single ad at position 5
+    } else {
+        // Ads every 8 items
+        (1..(passwordCount / 8)).map { it * 8 }
+    }
+}
+
+/**
+ * Get the password index for a given position in the list
+ * Accounts for ads inserted at specific positions
+ */
+private fun getPasswordIndexForPosition(position: Int, adPositions: List<Int>): Int {
+    val adsBefore = adPositions.count { it <= position }
+    return position - adsBefore
 }
 
 @Composable

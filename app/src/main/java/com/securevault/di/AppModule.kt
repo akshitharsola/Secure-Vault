@@ -7,6 +7,7 @@ import com.securevault.data.local.PasswordDatabase
 import com.securevault.data.repository.PasswordRepository
 import com.securevault.data.repository.PasswordRepositoryImpl
 import com.securevault.domain.usecase.*
+import com.securevault.utils.AdManager
 import com.securevault.utils.BackupManager
 import com.securevault.utils.BiometricHelper
 import com.securevault.utils.ClipboardManager
@@ -63,6 +64,10 @@ object AppModule {
 
     fun provideUpdateManager(context: Context): UpdateManager {
         return UpdateManager(context)
+    }
+
+    fun provideAdManager(context: Context): AdManager {
+        return AdManager(context)
     }
 
     // Backup-related dependencies
