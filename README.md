@@ -20,7 +20,7 @@ SecureVault is a modern, security-focused password manager built with cutting-ed
 - **Tamper Detection**: GCM authentication tags detect data corruption
 - **Automatic Migration**: Seamless upgrade from plain text to encrypted storage
 - **Biometric Auth**: Fingerprint/face unlock with secure PIN fallback
-- **Internet Permission**: Required for ads and update checks (passwords remain encrypted locally)
+- **Zero Permissions**: No internet, no network - completely offline
 
 ### 🎨 User Experience
 - **Material 3 Design**: Modern, beautiful interface
@@ -212,81 +212,6 @@ Encrypted Backup File (.backup)
 
 ---
 
-## 📢 Ad Integration & Privacy
-
-### Why Ads?
-
-SecureVault is now ad-supported to sustain ongoing development and maintenance. We're committed to keeping this project free and open source while ensuring continuous improvements and security updates.
-
-### Privacy Guarantees
-
-**What We NEVER Share:**
-- ✅ Password data remains encrypted locally with hardware-backed keys
-- ✅ No password information is ever transmitted over the network
-- ✅ Your usernames, account details, or any encrypted data
-- ✅ Backup files or encryption keys
-- ✅ Biometric data or authentication information
-
-**What Ads Access:**
-- 📱 Device advertising ID (for ad targeting - can be reset in Android Settings)
-- 🌐 Network connection (for ad loading only)
-- 📊 Basic analytics (app opens, ad impressions - anonymous)
-
-### Ad Network Privacy
-
-**Google AdMob Integration:**
-- Ads are displayed using Google AdMob's privacy-compliant SDK
-- All ad requests are separate from password operations
-- AdMob does NOT have access to your password database or encryption keys
-- You can opt out of personalized ads in: **Android Settings → Privacy → Ads**
-
-**Security Architecture:**
-```
-┌─────────────────────┐          ┌─────────────────────┐
-│   Password Storage  │          │   AdMob Network     │
-│  (Keystore AES-256) │          │   (Ads Only)        │
-│                     │          │                     │
-│  ✅ Encrypted DB     │  ❌ NO  │  📱 Device Ad ID     │
-│  ✅ Hardware Keys    │  ACCESS │  📊 Impressions      │
-│  ✅ Zero transmission│          │  🌐 Network requests │
-└─────────────────────┘          └─────────────────────┘
-```
-
-**Data Separation:**
-- Password encryption happens BEFORE any ad code runs
-- Ads are rendered in isolated UI components
-- No shared memory between password data and ad SDK
-- Verified with network traffic analysis (see CLAUDE.md for testing)
-
-### Transparency
-
-**Ad Placement:**
-- Native ads appear in the password list (every 8 items for large lists)
-- Clearly labeled with "Ad" or "Sponsored" badge
-- Styled to match Material 3 design but visually distinct (surfaceVariant color)
-- No intrusive popups, interstitials, or video ads
-
-**Your Control:**
-- All ads are clearly marked and non-deceptive
-- AdChoices icon visible on all ads
-- You can disable personalized ads in Android settings
-- Future: Ad-free premium version under consideration
-
-### Third-Party Service
-
-This app integrates Google AdMob for advertising purposes:
-- **Privacy Policy**: https://policies.google.com/privacy
-- **Ad Personalization Control**: Android Settings → Privacy → Ads
-- **Data Collection**: Device ID, usage analytics (NO password data)
-
-**If you have privacy concerns**, you can:
-1. Review the open-source code on GitHub
-2. Build from source and verify no password data in network logs
-3. Use network monitoring tools to inspect traffic
-4. Report any suspicious behavior via GitHub Issues
-
----
-
 ## 📸 Screenshots
 
 | Main Screen | Add Password | Settings | Search |
@@ -468,7 +393,6 @@ Contribute code, documentation, or bug reports to appear here!
 | **Encryption** | Android Keystore | Hardware-backed keys |
 | **PQC** | Bouncy Castle (ML-KEM-768) | Quantum resistance |
 | **Auth** | Biometric API | Fingerprint/face |
-| **Ads** | Google AdMob | Native ads for revenue |
 | **DI** | Manual DI (AppModule) | Lightweight |
 | **Async** | Kotlin Coroutines | Concurrency |
 | **Build** | Gradle (Kotlin DSL) | Build system |

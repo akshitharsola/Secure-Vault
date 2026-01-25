@@ -107,17 +107,3 @@
 
 # Keep quantum backup encryption class
 -keep class com.securevault.utils.QuantumBackupEncryption { *; }
-
-# ============================================================================
-# Google AdMob Rules
-# ============================================================================
-
-# Keep AdMob classes to prevent obfuscation issues
--keep class com.google.android.gms.ads.** { *; }
--keep class com.google.ads.** { *; }
--dontwarn com.google.android.gms.ads.**
-
-# Keep NativeAd members
--keepclassmembers class * extends com.google.android.gms.ads.nativead.NativeAd {
-    *;
-}

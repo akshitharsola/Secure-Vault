@@ -52,10 +52,6 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        // Initialize AdMob SDK for native ads
-        val adManager = AppModule.provideAdManager(applicationContext)
-        adManager.initialize()
-
         // Check if this is a theme change from intent or saved state
         val isThemeChangeFromIntent = intent.getBooleanExtra(EXTRA_IS_THEME_CHANGE, false)
         val isThemeChangeFromSavedState = savedInstanceState?.getBoolean(KEY_THEME_CHANGE_FLAG, false) ?: false

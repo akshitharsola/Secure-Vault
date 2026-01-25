@@ -15,8 +15,8 @@ android {
         applicationId = "com.securevault"
         minSdk = 24
         targetSdk = 35
-        versionCode = 21
-        versionName = "2.1.0"
+        versionCode = 20
+        versionName = "2.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -156,9 +156,6 @@ dependencies {
 
     // Bouncy Castle for post-quantum cryptography
     implementation("org.bouncycastle:bcprov-jdk18on:1.79")
-
-    // Google AdMob for native ads
-    implementation("com.google.android.gms:play-services-ads:22.6.0")
 
     // For file picking
     implementation(libs.androidx.activity.compose.v182)
