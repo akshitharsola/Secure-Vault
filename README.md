@@ -428,6 +428,28 @@ See [LICENSE](LICENSE) file for full details.
 
 ---
 
+## 💝 Support Development
+
+SecureVault is **free and open source**, built with passion to provide a truly secure password manager.
+
+If you find it useful, consider supporting continued development:
+
+- ⭐ **Star the repository** on GitHub
+- 🐛 **Report bugs** and suggest features
+- 💰 **GitHub Sponsors**: [Sponsor @akshitharsola](https://github.com/sponsors/akshitharsola) *(Coming soon)*
+- ☕ **Ko-fi**: [Buy me a coffee](https://ko-fi.com/securevault) *(Coming soon)*
+- 📢 **Share** with privacy-conscious friends
+
+**Why donate?**
+- Helps cover development time
+- Supports ongoing security updates
+- Funds future features (autofill, browser extension, etc.)
+- Keeps the app 100% free with **zero ads, zero tracking**
+
+Every contribution, no matter how small, makes a difference! 🙏
+
+---
+
 ## 📞 Support & Community
 
 - **🐛 Bug Reports**: [GitHub Issues](https://github.com/akshitharsola/Secure-Vault/issues)
