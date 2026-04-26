@@ -1,6 +1,6 @@
 # 🔐 SecureVault Android
 
-**A quantum-resistant, hardware-backed password manager for Android with zero internet permissions.**
+**A quantum-resistant, hardware-backed password manager for Android. Your passwords never leave your device.**
 
 [![Latest Release](https://img.shields.io/github/v/release/akshitharsola/Secure-Vault)](https://github.com/akshitharsola/Secure-Vault/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -20,7 +20,7 @@ SecureVault is a modern, security-focused password manager built with cutting-ed
 - **Tamper Detection**: GCM authentication tags detect data corruption
 - **Automatic Migration**: Seamless upgrade from plain text to encrypted storage
 - **Biometric Auth**: Fingerprint/face unlock with secure PIN fallback
-- **Privacy-First**: No data transmission — INTERNET used only for self-hosted update checks, never for your passwords
+- **Offline-First**: Passwords are never transmitted — no cloud, no sync, no tracking. INTERNET permission used only for optional update checks
 
 ### 🎨 User Experience
 - **Material 3 Design**: Modern, beautiful interface
@@ -334,7 +334,7 @@ Contribute code, documentation, or bug reports to appear here!
 
 | Document | Description |
 |----------|-------------|
-| [CLAUDE.md](.github/CLAUDE.md) | Developer guide for contributors |
+| [DEV_GUIDE.md](.github/DEV_GUIDE.md) | Developer guide for contributors |
 | [LICENSE](LICENSE) | MIT License with security disclaimers |
 | [MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md) | Upgrade instructions |
 | [DATABASE_ENCRYPTION_IMPLEMENTATION.md](docs/DATABASE_ENCRYPTION_IMPLEMENTATION.md) | v2.0 security architecture |
@@ -358,7 +358,7 @@ Contribute code, documentation, or bug reports to appear here!
 - [ ] Import from other managers
 - [ ] Browser extension integration
 
-### Future
+### Long-Term Vision
 - [ ] Desktop applications (Windows/Mac/Linux)
 - [ ] Hardware security key support (YubiKey)
 - [ ] Multi-vault support
