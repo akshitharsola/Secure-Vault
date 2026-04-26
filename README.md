@@ -216,7 +216,7 @@ Encrypted Backup File (.backup)
 
 | Main Screen | Add Password | Settings | Search |
 |-------------|--------------|----------|--------|
-| ![Main](Screenshots/main_page.jpg) | ![Add](Screenshots/add_password_page.jpg) | ![Settings](Screenshots/settings_page.jpg) | ![Theme](Screenshots/advanced%20theme_main_page.jpg) |
+| ![Main](Screenshots/main_page.jpg) | ![Add](Screenshots/add_password_page.jpg) | ![Settings](Screenshots/settings_page.jpg) | ![Theme](Screenshots/advanced_theme_main_page.jpg) |
 
 
 ---
@@ -336,16 +336,14 @@ Contribute code, documentation, or bug reports to appear here!
 |----------|-------------|
 | [CLAUDE.md](.github/CLAUDE.md) | Developer guide for contributors |
 | [LICENSE](LICENSE) | MIT License with security disclaimers |
-| [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) | Upgrade instructions |
-| [DATABASE_ENCRYPTION_IMPLEMENTATION.md](DATABASE_ENCRYPTION_IMPLEMENTATION.md) | v2.0 security architecture |
-| [QUANTUM_BACKUP_PROGRESS.md](QUANTUM_BACKUP_PROGRESS.md) | Quantum encryption implementation |
-| [MULTI_AGENT_WORKFLOW.md](MULTI_AGENT_WORKFLOW.md) | Development workflow |
+| [MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md) | Upgrade instructions |
+| [DATABASE_ENCRYPTION_IMPLEMENTATION.md](docs/DATABASE_ENCRYPTION_IMPLEMENTATION.md) | v2.0 security architecture |
 
 ---
 
 ## 🗺️ Roadmap
 
-### v2.1 (Q1 2026)
+### Upcoming Features
 - [ ] Password strength analyzer
 - [ ] Breach detection (offline)
 - [ ] Password generator with custom rules
@@ -353,7 +351,7 @@ Contribute code, documentation, or bug reports to appear here!
 - [ ] Categories/folders
 - [ ] Password history
 
-### v3.0 (Q2 2026)
+### Future
 - [ ] Full quantum-resistant database encryption
 - [ ] Auto-fill service integration
 - [ ] Wear OS companion app
@@ -414,7 +412,6 @@ See [LICENSE](LICENSE) file for full details.
 - **Bouncy Castle**: Comprehensive cryptography library
 - **Kotlin Team**: Modern, expressive language
 - **Open Source Community**: Continuous inspiration and support
-- **Claude Code (Anthropic)**: AI-assisted development tooling
 
 ---
 

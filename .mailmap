@@ -5,6 +5,7 @@
 Akshit Harsola <harsolaakshit@gmail.com> Akshit Harsola <akshitharsola@example.com>
 Akshit Harsola <harsolaakshit@gmail.com> Akshit Harsola <harsolaakshit@gmail.com>
 
-# AI Assistant - Claude (Anthropic)
-Claude <noreply@anthropic.com> Claude Sonnet 4.5 <noreply@anthropic.com>
-Claude <noreply@anthropic.com> claude <noreply@anthropic.com>
+# Remap AI co-author commits to the primary developer
+Akshit Harsola <harsolaakshit@gmail.com> Claude Sonnet 4.5 <noreply@anthropic.com>
+Akshit Harsola <harsolaakshit@gmail.com> Claude <noreply@anthropic.com>
+Akshit Harsola <harsolaakshit@gmail.com> claude <noreply@anthropic.com>

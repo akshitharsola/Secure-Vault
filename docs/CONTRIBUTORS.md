@@ -19,23 +19,6 @@ This file recognizes all contributors to the SecureVault Android project.
 
 ---
 
-### Claude Sonnet 4.5 (Anthropic)
-**Role**: AI Pair Programming Assistant
-**Contributions**:
-- v2.0 security architecture (Android Keystore encryption)
-- Quantum-resistant backup encryption (ML-KEM-768 + X25519)
-- Automatic migration system (plain text → encrypted)
-- Code review and optimization
-- Documentation and technical writing
-- Bug fixes and feature implementations
-- Testing and quality assurance
-
-**Technology**: [Claude by Anthropic](https://www.anthropic.com)
-**Co-Author Commits**: All commits since v2.0.0 include:
-`Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>`
-
----
-
 ## How to Contribute
 
 We welcome contributions from everyone! Here's how you can help:
