@@ -110,3 +110,6 @@ test-screenshots/
 # Temporary files
 *.tmp
 temp/
+
+# ProGuard release mappings (internal — use crash symbolication tools instead)
+proguard-mappings/

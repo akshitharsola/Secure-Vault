@@ -20,7 +20,7 @@ SecureVault is a modern, security-focused password manager built with cutting-ed
 - **Tamper Detection**: GCM authentication tags detect data corruption
 - **Automatic Migration**: Seamless upgrade from plain text to encrypted storage
 - **Biometric Auth**: Fingerprint/face unlock with secure PIN fallback
-- **Zero Permissions**: No internet, no network - completely offline
+- **Privacy-First**: No data transmission — INTERNET used only for self-hosted update checks, never for your passwords
 
 ### 🎨 User Experience
 - **Material 3 Design**: Modern, beautiful interface
@@ -68,7 +68,7 @@ The APK will be in `app/build/outputs/apk/release/app-release.apk`
 - **Target**: Android 15 (API 35)
 - **Storage**: ~20 MB
 - **Recommended**: Device with biometric hardware
-- **Current Version**: v2.0.3 (January 2026)
+- **Current Version**: v2.0.4 (January 2026)
 
 ---
 
@@ -218,7 +218,6 @@ Encrypted Backup File (.backup)
 |-------------|--------------|----------|--------|
 | ![Main](Screenshots/main_page.jpg) | ![Add](Screenshots/add_password_page.jpg) | ![Settings](Screenshots/settings_page.jpg) | ![Theme](Screenshots/advanced%20theme_main_page.jpg) |
 
-*Screenshots may be outdated. UI continuously improves with Material 3 updates.*
 
 ---
 
@@ -320,15 +319,6 @@ We welcome contributions! Here's how:
       <br />
       <sub>Original Author & Maintainer</sub>
     </td>
-    <td align="center">
-      <a href="https://www.anthropic.com">
-        <img src="https://www.anthropic.com/images/icons/apple-touch-icon.png" width="100px;" alt="Claude"/>
-        <br />
-        <sub><b>Claude Sonnet 4.5</b></sub>
-      </a>
-      <br />
-      <sub>AI Pair Programming Assistant</sub>
-    </td>
   </tr>
 </table>
 
@@ -344,7 +334,7 @@ Contribute code, documentation, or bug reports to appear here!
 
 | Document | Description |
 |----------|-------------|
-| [CLAUDE.md](CLAUDE.md) | Developer guide for Claude Code |
+| [CLAUDE.md](.github/CLAUDE.md) | Developer guide for contributors |
 | [LICENSE](LICENSE) | MIT License with security disclaimers |
 | [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) | Upgrade instructions |
 | [DATABASE_ENCRYPTION_IMPLEMENTATION.md](DATABASE_ENCRYPTION_IMPLEMENTATION.md) | v2.0 security architecture |
@@ -368,7 +358,6 @@ Contribute code, documentation, or bug reports to appear here!
 - [ ] Auto-fill service integration
 - [ ] Wear OS companion app
 - [ ] Import from other managers
-- [ ] Optional encrypted cloud sync
 - [ ] Browser extension integration
 
 ### Future
@@ -425,6 +414,7 @@ See [LICENSE](LICENSE) file for full details.
 - **Bouncy Castle**: Comprehensive cryptography library
 - **Kotlin Team**: Modern, expressive language
 - **Open Source Community**: Continuous inspiration and support
+- **Claude Code (Anthropic)**: AI-assisted development tooling
 
 ---
 
